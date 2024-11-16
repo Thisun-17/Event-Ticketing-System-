@@ -1,17 +1,16 @@
-package org.example.ticketing;
+package org.example.ticketing.model;
 
 public class Ticket {
-    private String ticketId;
-    private double price;
-    private boolean isAvailable;  // New property
+    private final String ticketId;
+    private final double price;
+    private boolean isAvailable;
 
     public Ticket(String ticketId, double price) {
         this.ticketId = ticketId;
         this.price = price;
-        this.isAvailable = true;  // New ticket is always available initially
+        this.isAvailable = true;
     }
 
-    // Existing getters
     public String getTicketId() {
         return ticketId;
     }
@@ -20,18 +19,25 @@ public class Ticket {
         return price;
     }
 
-    // New getter for availability
     public boolean isAvailable() {
         return isAvailable;
     }
 
-    // New method to sell ticket
-    public void sellTicket() {
+    // Synchronized method to sell the ticket
+    public synchronized boolean sell() {
         if (isAvailable) {
             isAvailable = false;
-            System.out.println("Ticket " + ticketId + " has been sold.");
-        } else {
-            System.out.println("Ticket " + ticketId + " is already sold!");
+            return true;
         }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "Ticket{" +
+                "id='" + ticketId + '\'' +
+                ", price=" + price +
+                ", available=" + isAvailable +
+                '}';
     }
 }

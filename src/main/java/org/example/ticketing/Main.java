@@ -1,29 +1,31 @@
 package org.example.ticketing;
 
+import org.example.ticketing.model.Ticket;
+import org.example.ticketing.model.TicketPool;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Event Ticketing System\n");
+        System.out.println("Starting Ticket System Test...\n");
 
-        // Create a ticket
-        Ticket ticket = new Ticket("T001", 100.0);
+        // Create a ticket pool with max capacity of 5
+        TicketPool ticketPool = new TicketPool(5);
 
-        // Test 1: Print initial ticket information
-        System.out.println("Initial Ticket Status:");
-        System.out.println("Ticket ID: " + ticket.getTicketId());
-        System.out.println("Price: $" + ticket.getPrice());
-        System.out.println("Available: " + ticket.isAvailable());
+        // Add some test tickets
+        for (int i = 1; i <= 3; i++) {
+            Ticket ticket = new Ticket("T00" + i, 100.0);
+            ticketPool.addTicket(ticket);
+        }
 
-        // Test 2: Try to sell the ticket
-        System.out.println("\nSelling ticket...");
-        ticket.sellTicket();
+        System.out.println("\nAvailable tickets: " + ticketPool.getAvailableTickets());
+        System.out.println("Total tickets sold: " + ticketPool.getTotalTicketsSold());
 
-        // Test 3: Check ticket status after selling
-        System.out.println("\nTicket Status After Sale:");
-        System.out.println("Ticket ID: " + ticket.getTicketId());
-        System.out.println("Available: " + ticket.isAvailable());
+        // Try to purchase tickets
+        System.out.println("\nAttempting to purchase tickets...");
+        Ticket purchasedTicket1 = ticketPool.purchaseTicket();
+        Ticket purchasedTicket2 = ticketPool.purchaseTicket();
 
-        // Test 4: Try to sell the same ticket again
-        System.out.println("\nTrying to sell the same ticket again...");
-        ticket.sellTicket();
+        System.out.println("\nFinal Status:");
+        System.out.println("Available tickets: " + ticketPool.getAvailableTickets());
+        System.out.println("Total tickets sold: " + ticketPool.getTotalTicketsSold());
     }
 }
