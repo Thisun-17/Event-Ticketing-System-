@@ -14,12 +14,12 @@ public class Configuration {
     private int customerPurchaseRate;
     private double defaultTicketPrice;
 
-    // Default constructor with initial values
+    // Default constructor
     public Configuration() {
         this(10, 2, 1, 100.0);
     }
 
-    // Custom constructor
+    // Constructor with parameters
     public Configuration(int maxTicketPoolCapacity, int vendorReleaseRate,
                          int customerPurchaseRate, double defaultTicketPrice) {
         validateAndSetPoolCapacity(maxTicketPoolCapacity);
@@ -28,7 +28,6 @@ public class Configuration {
         validateAndSetTicketPrice(defaultTicketPrice);
     }
 
-    // Enhanced validation methods
     private void validateAndSetPoolCapacity(int capacity) {
         if (capacity < MIN_POOL_CAPACITY || capacity > MAX_POOL_CAPACITY) {
             throw new IllegalArgumentException(
@@ -86,7 +85,6 @@ public class Configuration {
         return defaultTicketPrice;
     }
 
-    // Configuration status
     @Override
     public String toString() {
         return String.format("""

@@ -8,10 +8,8 @@ public class TicketPool {
     private final int maxCapacity;
     private final AtomicInteger totalTicketsSold;
     private final AtomicInteger ticketsCreated;
-
-    // New monitoring fields
-    private long startTime;
     private final AtomicInteger failedPurchaseAttempts;
+    private long startTime;
 
     public TicketPool(int maxCapacity) {
         this.tickets = new ConcurrentLinkedQueue<>();
@@ -23,43 +21,59 @@ public class TicketPool {
     }
 
     public synchronized boolean addTicket(Ticket ticket) {
-        if (tickets.size() < maxCapacity) {
-            boolean added = tickets.offer(ticket);
-            if (added) {
-                ticketsCreated.incrementAndGet();
-                System.out.println("Added ticket: " + ticket.getTicketId() +
-                        " (Pool: " + tickets.size() + "/" + maxCapacity + ")");
+        try {
+            if (tickets.size() < maxCapacity) {
+                boolean added = tickets.offer(ticket);
+                if (added) {
+                    ticketsCreated.incrementAndGet();
+                    System.out.printf("Added ticket: %s (Pool: %d/%d)%n",
+                            ticket.getTicketId(), tickets.size(), maxCapacity);
+                }
+                return added;
             }
-            return added;
+            return false;
+        } catch (Exception e) {
+            System.err.println("Error adding ticket: " + e.getMessage());
+            return false;
         }
-        return false;
     }
 
     public synchronized Ticket purchaseTicket() {
-        Ticket ticket = tickets.poll();
-        if (ticket != null && ticket.sell()) {
-            totalTicketsSold.incrementAndGet();
-            System.out.println("Sold ticket: " + ticket.getTicketId() +
-                    " (Remaining: " + tickets.size() + ")");
-            return ticket;
-        } else {
+        try {
+            Ticket ticket = tickets.poll();
+            if (ticket != null && ticket.sell()) {
+                totalTicketsSold.incrementAndGet();
+                System.out.printf("Sold ticket: %s (Remaining: %d)%n",
+                        ticket.getTicketId(), tickets.size());
+                return ticket;
+            } else {
+                failedPurchaseAttempts.incrementAndGet();
+            }
+            return null;
+        } catch (Exception e) {
+            System.err.println("Error purchasing ticket: " + e.getMessage());
             failedPurchaseAttempts.incrementAndGet();
+            return null;
         }
-        return null;
     }
 
-    // New monitoring methods
     public void printStatistics() {
-        long runningTime = (System.currentTimeMillis() - startTime) / 1000; // in seconds
+        long runningTime = (System.currentTimeMillis() - startTime) / 1000;
         System.out.println("\n=== Ticket Pool Statistics ===");
         System.out.println("Running Time: " + runningTime + " seconds");
         System.out.println("Available Tickets: " + tickets.size() + "/" + maxCapacity);
         System.out.println("Total Tickets Created: " + ticketsCreated.get());
         System.out.println("Total Tickets Sold: " + totalTicketsSold.get());
         System.out.println("Failed Purchase Attempts: " + failedPurchaseAttempts.get());
+
         if (runningTime > 0) {
-            System.out.println("Sales Rate: " + (totalTicketsSold.get() / runningTime) + " tickets/second");
+            double salesRate = (double) totalTicketsSold.get() / runningTime;
+            System.out.printf("Sales Rate: %.2f tickets/second%n", salesRate);
         }
+
+        double successRate = totalTicketsSold.get() + failedPurchaseAttempts.get() > 0 ?
+                (double) totalTicketsSold.get() / (totalTicketsSold.get() + failedPurchaseAttempts.get()) * 100 : 0;
+        System.out.printf("Purchase Success Rate: %.1f%%%n", successRate);
         System.out.println("============================\n");
     }
 
@@ -70,7 +84,7 @@ public class TicketPool {
         failedPurchaseAttempts.set(0);
     }
 
-    // Getters for monitoring
+    // Getters
     public int getAvailableTickets() {
         return tickets.size();
     }

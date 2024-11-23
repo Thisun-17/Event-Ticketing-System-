@@ -1,4 +1,4 @@
-package org.example.ticketing.config;
+package org.example.ticketing.consumer;
 
 import org.example.ticketing.model.Ticket;
 import org.example.ticketing.model.TicketPool;
